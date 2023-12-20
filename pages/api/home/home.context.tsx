@@ -2,24 +2,24 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
-import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
-import { FolderType } from '@/types/folder';
 
 import { HomeInitialState } from './home.state';
+import { Thread } from '@/types/assistant';
+import { Message } from '@/types/chat';
 
 export interface HomeContextProps {
   state: HomeInitialState;
   dispatch: Dispatch<ActionType<HomeInitialState>>;
-  handleNewConversation: () => void;
-  handleCreateFolder: (name: string, type: FolderType) => void;
-  handleDeleteFolder: (folderId: string) => void;
-  handleUpdateFolder: (folderId: string, name: string) => void;
-  handleSelectConversation: (conversation: Conversation) => void;
-  handleUpdateConversation: (
-    conversation: Conversation,
+  handleNewThread: () => Promise<void>;
+  handleSelectThread: (thread: Thread) => void;
+  handleUpdateThread: (
+    thread: Thread,
     data: KeyValuePair,
   ) => void;
+  handleCreateRun: (message?: Message) => Promise<boolean>;
+  handleCancelRun: (runId: string) => Promise<boolean>;
+  handlePollRun: (runId: string) => Promise<void>;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

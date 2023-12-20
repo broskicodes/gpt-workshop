@@ -14,7 +14,7 @@ import {
   useState,
 } from 'react';
 
-import { Conversation } from '@/types/chat';
+import { Thread } from '@/types/assistant';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -22,17 +22,17 @@ import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
 
 interface Props {
-  conversation: Conversation;
+  thread: Thread;
 }
 
-export const ConversationComponent = ({ conversation }: Props) => {
+export const ThreadComponent = ({ thread }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming },
-    handleSelectConversation,
-    handleUpdateConversation,
+    state: { selectedThread, messageIsStreaming },
+    handleSelectThread,
+    handleUpdateThread,
   } = useContext(HomeContext);
 
-  const { handleDeleteConversation } = useContext(ChatbarContext);
+  const { handleDeleteThread } = useContext(ChatbarContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -41,22 +41,22 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      selectedConversation && handleRename(selectedConversation);
+      selectedThread && handleRename(selectedThread);
     }
   };
 
   const handleDragStart = (
     e: DragEvent<HTMLButtonElement>,
-    conversation: Conversation,
+    thread: Thread,
   ) => {
     if (e.dataTransfer) {
-      e.dataTransfer.setData('conversation', JSON.stringify(conversation));
+      e.dataTransfer.setData('thread', JSON.stringify(thread));
     }
   };
 
-  const handleRename = (conversation: Conversation) => {
+  const handleRename = (thread: Thread) => {
     if (renameValue.trim().length > 0) {
-      handleUpdateConversation(conversation, {
+      handleUpdateThread(thread, {
         key: 'name',
         value: renameValue,
       });
@@ -68,9 +68,9 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const handleConfirm: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     if (isDeleting) {
-      handleDeleteConversation(conversation);
+      handleDeleteThread(thread);
     } else if (isRenaming) {
-      handleRename(conversation);
+      handleRename(thread);
     }
     setIsDeleting(false);
     setIsRenaming(false);
@@ -85,7 +85,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const handleOpenRenameModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsRenaming(true);
-    selectedConversation && setRenameValue(selectedConversation.name);
+    selectedThread && setRenameValue(selectedThread.name);
   };
   const handleOpenDeleteModal: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
@@ -102,7 +102,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
 
   return (
     <div className="relative flex items-center">
-      {isRenaming && selectedConversation?.id === conversation.id ? (
+      {isRenaming && selectedThread?.id === thread.id ? (
         <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
           <IconMessage size={18} />
           <input
@@ -119,28 +119,28 @@ export const ConversationComponent = ({ conversation }: Props) => {
           className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 ${
             messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
           } ${
-            selectedConversation?.id === conversation.id
+            selectedThread?.id === thread.id
               ? 'bg-[#343541]/90'
               : ''
           }`}
-          onClick={() => handleSelectConversation(conversation)}
+          onClick={() => handleSelectThread(thread)}
           disabled={messageIsStreaming}
           draggable="true"
-          onDragStart={(e) => handleDragStart(e, conversation)}
+          onDragStart={(e) => handleDragStart(e, thread)}
         >
           <IconMessage size={18} />
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
-              selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
+              selectedThread?.id === thread.id ? 'pr-12' : 'pr-1'
             }`}
           >
-            {conversation.name}
+            {thread.name}
           </div>
         </button>
       )}
 
       {(isDeleting || isRenaming) &&
-        selectedConversation?.id === conversation.id && (
+        selectedThread?.id === thread.id && (
           <div className="absolute right-1 z-10 flex text-gray-300">
             <SidebarActionButton handleClick={handleConfirm}>
               <IconCheck size={18} />
@@ -151,7 +151,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
           </div>
         )}
 
-      {selectedConversation?.id === conversation.id &&
+      {selectedThread?.id === thread.id &&
         !isDeleting &&
         !isRenaming && (
           <div className="absolute right-1 z-10 flex text-gray-300">

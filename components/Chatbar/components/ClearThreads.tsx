@@ -6,16 +6,16 @@ import { useTranslation } from 'next-i18next';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 
 interface Props {
-  onClearConversations: () => void;
+  onClearThreads: () => void;
 }
 
-export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
+export const ClearThreads: FC<Props> = ({ onClearThreads }) => {
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
   const { t } = useTranslation('sidebar');
 
-  const handleClearConversations = () => {
-    onClearConversations();
+  const handleClearThreads = () => {
+    onClearThreads();
     setIsConfirming(false);
   };
 
@@ -33,7 +33,7 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
           size={18}
           onClick={(e) => {
             e.stopPropagation();
-            handleClearConversations();
+            handleClearThreads();
           }}
         />
 

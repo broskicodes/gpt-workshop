@@ -1,11 +1,11 @@
-import { Conversation } from '@/types/chat';
+import { Thread } from '@/types/assistant';
 
 export interface ChatbarInitialState {
   searchTerm: string;
-  filteredConversations: Conversation[];
+  filteredThreads: Thread[];
 }
 
 export const initialState: ChatbarInitialState = {
   searchTerm: '',
-  filteredConversations: [],
+  filteredThreads: [],
 };

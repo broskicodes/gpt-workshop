@@ -16,7 +16,8 @@
     "incremental": true,
     "types": ["vitest/globals"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "react": [ "./node_modules/@types/react" ]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

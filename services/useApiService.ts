@@ -1,34 +1,22 @@
 import { useCallback } from 'react';
 
 import { useFetch } from '@/hooks/useFetch';
+import { Message } from 'postcss';
 
-export interface GetModelsRequestProps {
-  key: string;
+export interface GetAssistantsRequestProps {
+  a_id: string;
+}
+
+export interface CreateThreadRequestProps {
+  messages: Message[] | undefined;
 }
 
 const useApiService = () => {
   const fetchService = useFetch();
 
-  // const getModels = useCallback(
-  // 	(
-  // 		params: GetManagementRoutineInstanceDetailedParams,
-  // 		signal?: AbortSignal
-  // 	) => {
-  // 		return fetchService.get<GetManagementRoutineInstanceDetailed>(
-  // 			`/v1/ManagementRoutines/${params.managementRoutineId}/instances/${params.instanceId
-  // 			}?sensorGroupIds=${params.sensorGroupId ?? ''}`,
-  // 			{
-  // 				signal,
-  // 			}
-  // 		);
-  // 	},
-  // 	[fetchService]
-  // );
-
-  const getModels = useCallback(
-    (params: GetModelsRequestProps, signal?: AbortSignal) => {
-      return fetchService.post<GetModelsRequestProps>(`/api/models`, {
-        body: { key: params.key },
+  const getAssistant = useCallback(
+    (params: GetAssistantsRequestProps, signal?: AbortSignal) => {
+      return fetchService.get<GetAssistantsRequestProps>(`/api/assistants/${params.a_id}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -38,8 +26,21 @@ const useApiService = () => {
     [fetchService],
   );
 
+  const createThread = useCallback(
+    (params: CreateThreadRequestProps, signal?: AbortSignal) => {
+      return fetchService.post<CreateThreadRequestProps>(`/api/assistants/threads`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: { messages: params.messages },
+        signal
+      })
+    }, [fetchService]
+  );
+
   return {
-    getModels,
+    getAssistant,
+    createThread
   };
 };
 

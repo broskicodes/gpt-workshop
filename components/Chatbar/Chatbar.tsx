@@ -4,27 +4,18 @@ import { useTranslation } from 'next-i18next';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
-import { saveConversation, saveConversations } from '@/utils/app/conversation';
-import { saveFolders } from '@/utils/app/folders';
-import { exportData, importData } from '@/utils/app/importExport';
-
-import { Conversation } from '@/types/chat';
-import { LatestExportFormat, SupportedExportFormats } from '@/types/export';
-import { OpenAIModels } from '@/types/openai';
-import { PluginKey } from '@/types/plugin';
-
 import HomeContext from '@/pages/api/home/home.context';
 
-import { ChatFolders } from './components/ChatFolders';
 import { ChatbarSettings } from './components/ChatbarSettings';
-import { Conversations } from './components/Conversations';
+import { Threads } from './components/Threads';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
+import { saveThread, saveThreads } from '@/utils/app/thread';
+import { Thread } from '@/types/assistant';
 
 export const Chatbar = () => {
   const { t } = useTranslation('sidebar');
@@ -34,15 +25,14 @@ export const Chatbar = () => {
   });
 
   const {
-    state: { conversations, showChatbar, defaultModelId, folders, pluginKeys },
+    state: { threads, showChatbar,  },
     dispatch: homeDispatch,
-    handleCreateFolder,
-    handleNewConversation,
-    handleUpdateConversation,
+    handleNewThread,
+    handleUpdateThread,
   } = useContext(HomeContext);
 
   const {
-    state: { searchTerm, filteredConversations },
+    state: { searchTerm, filteredThreads },
     dispatch: chatDispatch,
   } = chatBarContextValue;
 
@@ -55,120 +45,34 @@ export const Chatbar = () => {
     [homeDispatch],
   );
 
-  const handlePluginKeyChange = (pluginKey: PluginKey) => {
-    if (pluginKeys.some((key) => key.pluginId === pluginKey.pluginId)) {
-      const updatedPluginKeys = pluginKeys.map((key) => {
-        if (key.pluginId === pluginKey.pluginId) {
-          return pluginKey;
-        }
+  const handleClearThreads = async () => {
+    homeDispatch({ field: 'threads', value: [] });
 
-        return key;
-      });
+    localStorage.removeItem('threadHistory');
+    localStorage.removeItem('selectedThread');
 
-      homeDispatch({ field: 'pluginKeys', value: updatedPluginKeys });
-
-      localStorage.setItem('pluginKeys', JSON.stringify(updatedPluginKeys));
-    } else {
-      homeDispatch({ field: 'pluginKeys', value: [...pluginKeys, pluginKey] });
-
-      localStorage.setItem(
-        'pluginKeys',
-        JSON.stringify([...pluginKeys, pluginKey]),
-      );
-    }
+    await handleNewThread();
   };
 
-  const handleClearPluginKey = (pluginKey: PluginKey) => {
-    const updatedPluginKeys = pluginKeys.filter(
-      (key) => key.pluginId !== pluginKey.pluginId,
+  const handleDeleteThread = async (thread: Thread) => {
+    const updatedThreads = threads.filter(
+      (c) => c.id !== thread.id,
     );
 
-    if (updatedPluginKeys.length === 0) {
-      homeDispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
-      return;
-    }
-
-    homeDispatch({ field: 'pluginKeys', value: updatedPluginKeys });
-
-    localStorage.setItem('pluginKeys', JSON.stringify(updatedPluginKeys));
-  };
-
-  const handleExportData = () => {
-    exportData();
-  };
-
-  const handleImportConversations = (data: SupportedExportFormats) => {
-    const { history, folders, prompts }: LatestExportFormat = importData(data);
-    homeDispatch({ field: 'conversations', value: history });
-    homeDispatch({
-      field: 'selectedConversation',
-      value: history[history.length - 1],
-    });
-    homeDispatch({ field: 'folders', value: folders });
-    homeDispatch({ field: 'prompts', value: prompts });
-
-    window.location.reload();
-  };
-
-  const handleClearConversations = () => {
-    defaultModelId &&
-      homeDispatch({
-        field: 'selectedConversation',
-        value: {
-          id: uuidv4(),
-          name: t('New Conversation'),
-          messages: [],
-          model: OpenAIModels[defaultModelId],
-          prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: DEFAULT_TEMPERATURE,
-          folderId: null,
-        },
-      });
-
-    homeDispatch({ field: 'conversations', value: [] });
-
-    localStorage.removeItem('conversationHistory');
-    localStorage.removeItem('selectedConversation');
-
-    const updatedFolders = folders.filter((f) => f.type !== 'chat');
-
-    homeDispatch({ field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-  };
-
-  const handleDeleteConversation = (conversation: Conversation) => {
-    const updatedConversations = conversations.filter(
-      (c) => c.id !== conversation.id,
-    );
-
-    homeDispatch({ field: 'conversations', value: updatedConversations });
+    homeDispatch({ field: 'threads', value: updatedThreads });
     chatDispatch({ field: 'searchTerm', value: '' });
-    saveConversations(updatedConversations);
+    saveThreads(updatedThreads);
 
-    if (updatedConversations.length > 0) {
+    if (updatedThreads.length > 0) {
       homeDispatch({
-        field: 'selectedConversation',
-        value: updatedConversations[updatedConversations.length - 1],
+        field: 'selectedThread',
+        value: updatedThreads[updatedThreads.length - 1],
       });
 
-      saveConversation(updatedConversations[updatedConversations.length - 1]);
+      saveThread(updatedThreads[updatedThreads.length - 1]);
     } else {
-      defaultModelId &&
-        homeDispatch({
-          field: 'selectedConversation',
-          value: {
-            id: uuidv4(),
-            name: t('New Conversation'),
-            messages: [],
-            model: OpenAIModels[defaultModelId],
-            prompt: DEFAULT_SYSTEM_PROMPT,
-            temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
-          },
-        });
-
-      localStorage.removeItem('selectedConversation');
+      localStorage.removeItem('selectedThread');
+      await handleNewThread();
     }
   };
 
@@ -177,63 +81,47 @@ export const Chatbar = () => {
     localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
   };
 
-  const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
-      handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
-      chatDispatch({ field: 'searchTerm', value: '' });
-      e.target.style.background = 'none';
-    }
-  };
-
   useEffect(() => {
     if (searchTerm) {
       chatDispatch({
-        field: 'filteredConversations',
-        value: conversations.filter((conversation) => {
+        field: 'filteredThreads',
+        value: threads.filter((thread) => {
           const searchable =
-            conversation.name.toLocaleLowerCase() +
+            thread.name.toLocaleLowerCase() +
             ' ' +
-            conversation.messages.map((message) => message.content).join(' ');
+            thread.messages.map((message) => message.content).join(' ');
           return searchable.toLowerCase().includes(searchTerm.toLowerCase());
         }),
       });
     } else {
       chatDispatch({
-        field: 'filteredConversations',
-        value: conversations,
+        field: 'filteredThreads',
+        value: threads,
       });
     }
-  }, [searchTerm, conversations]);
+  }, [searchTerm, threads]);
 
   return (
     <ChatbarContext.Provider
       value={{
         ...chatBarContextValue,
-        handleDeleteConversation,
-        handleClearConversations,
-        handleImportConversations,
-        handleExportData,
-        handlePluginKeyChange,
-        handleClearPluginKey,
+        handleDeleteThread,
+        handleClearThreads,
         handleApiKeyChange,
       }}
     >
-      <Sidebar<Conversation>
+      <Sidebar<Thread>
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
-        itemComponent={<Conversations conversations={filteredConversations} />}
-        folderComponent={<ChatFolders searchTerm={searchTerm} />}
-        items={filteredConversations}
+        itemComponent={<Threads threads={filteredThreads} />}
+        items={filteredThreads}
         searchTerm={searchTerm}
         handleSearchTerm={(searchTerm: string) =>
           chatDispatch({ field: 'searchTerm', value: searchTerm })
         }
         toggleOpen={handleToggleChatbar}
-        handleCreateItem={handleNewConversation}
-        handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
-        handleDrop={handleDrop}
+        handleCreateItem={handleNewThread}
         footerComponent={<ChatbarSettings />}
       />
     </ChatbarContext.Provider>
