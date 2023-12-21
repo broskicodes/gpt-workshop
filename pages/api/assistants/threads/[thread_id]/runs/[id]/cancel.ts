@@ -1,24 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { Run } from "openai/resources/beta/threads/runs/runs";
 
-async function validateRun(thread_id: string, run_id: string): Promise<string | boolean> {
-  // Check if run_id is valid
-  const getRunResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}/runs/${run_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-    },
-  });
+async function validateRun(thread_id: string, run_id: string): Promise<Run | boolean> {
+  // TODO: Retrieve the run with the given run ID
+  // TODO Return the run object
 
-  const getRunData = await getRunResponse.json();
-
-  if (getRunData.error) {
-    console.error('Error getting run:', getRunData.error);
-    return false;
-  }
-
-  return getRunData;
+  throw new Error('Not implemented');
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -36,22 +23,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    const cancelRunResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}/runs/${run_id}/cancel`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-      },
-    });
-
-
-    if (cancelRunResponse.ok) {
-      res.status(200).json(await cancelRunResponse.json());
-    } else {
-      res.status(500).json({ error: 'Could not cancel run' });
-    }
+    
+    // TODO: Call OpenAI API to cancel the run
+    // TODO: Respond with the new run object
+    
+    res.status(500).send('Not implemented');
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred' });
+    res.status(500).json({ error: error });
   }
 }

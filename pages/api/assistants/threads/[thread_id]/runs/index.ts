@@ -1,74 +1,31 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { config } from 'dotenv';
 import { Message } from '@/types/chat';
+import { Assistant } from 'openai/resources/beta/assistants/assistants';
+import { Thread } from 'openai/resources/beta/threads/threads';
+import { ThreadMessage } from 'openai/resources/beta/threads/messages/messages';
 
 config(); // Load environment variables from .env.local file
 
-async function validateAssistant(assistant_id: string): Promise<string | boolean> {
-  // Check if assistant_id is valid
-  const getAssistantResponse = await fetch(`https://api.openai.com/v1/assistants/${assistant_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-    },
-  });
+async function validateAssistant(assistant_id: string): Promise<Assistant | boolean> {
+  // TODO: Retrieve the assistant with the given assistant ID
+  // TODO Return the assistant object
 
-  const getAssistantData = await getAssistantResponse.json();
-
-  if (getAssistantData.error) {
-    console.error('Error getting assistant:', getAssistantData.error);
-    return false;
-  }
-
-  return getAssistantData.id;
+  throw new Error('Not implemented');
 }
 
-async function validateThread(thread_id: string): Promise<string | boolean> {
-  // Check if thread_id is valid
-  const getThreadResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-    },
-  });
+async function validateThread(thread_id: string): Promise<Thread | boolean> {
+  // TODO: Retrieve the thread with the given thread ID
+  // TODO Return the thread object
 
-  const getThreadData = await getThreadResponse.json();
-
-  if (getThreadData.error) {
-    console.error('Error getting thread:', getThreadData.error);
-    return false;
-  }
-
-  return getThreadData.id;
+  throw new Error('Not implemented');
 }
 
-async function createMessage(thread_id: string, message: Message): Promise<string | boolean> {
-  // Create a new message
-  const createMessageResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}/messages`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-    },
-    body: JSON.stringify({
-      role: message.role,
-      content: message.content,
-    }),
-  });
+async function createMessage(thread_id: string, message: Message): Promise<ThreadMessage | boolean> {
+  // TODO: Create a new message in the given thread with the given message data
+  // TODO Return the message object
 
-  const createMessageData = await createMessageResponse.json();
-
-  if (createMessageData.error) {
-    console.error('Error creating message:', createMessageData.error);
-    return false;
-  }
-
-  return createMessageData.id;
+  throw new Error('Not implemented');
 }
         
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -95,32 +52,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    assistant_id = assistant as string;
-    thread_id = thread as string;
+    message && await createMessage(thread_id as string, message);
 
-    message && await createMessage(thread_id, message);
+    // TODO: Call OpenAI API to create a new run on the given thread
+    // TODO: Respond with created run object
 
-    const response = await fetch(`https://api.openai.com/v1/threads/${thread_id}/runs`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-      },
-      body: JSON.stringify({
-        assistant_id: assistant_id,
-      }),
-    });
-
-    const runData = await response.json();
-
-    if (runData.error) {
-      res.status(400).json({ error: 'Invalid thread_id' });
-      return;
-    }
-
-    res.status(200).json(runData);
+    res.status(500).send('Not implemented');
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred' });
+    res.status(500).json({ error: error });
   }
 }

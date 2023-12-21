@@ -18,27 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    // Create a new thread
-    const createThreadResponse = await fetch(`https://api.openai.com/v1/threads`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
-      },
-      body: JSON.stringify({
-        messages: messages ?? undefined,
-      }),
-    });
+    // TODO: Call OpenAI API to create a new thread
+    // TODO: Respond with the thread_id (only id, not object)
 
-    const createThreadData = await createThreadResponse.json();
-
-    if (createThreadData.error) {
-      console.error('Error creating thread:', createThreadData.error);
-      return false;
-    }
-
-    res.status(200).json(createThreadData.id);
+    res.status(500).send('Not implemented');
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
