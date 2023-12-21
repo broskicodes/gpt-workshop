@@ -4,7 +4,6 @@ import OpenAI from 'openai';
 import { RunSubmitToolOutputsParams } from 'openai/resources/beta/threads/runs/runs';
 
 
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -19,10 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const toolOutputs: RunSubmitToolOutputsParams.ToolOutput[] = await Promise.all(tool_calls.map(async (tool_call: ToolCall) => {
       const { id: call_id, function: funcCall } = tool_call;
       const args = JSON.parse(funcCall.arguments);
-      // console.log(funcCall.name, args);
 
       switch (funcCall.name) {
-        // EXTENSION: Handle your custom function calls here
+        // EXTENSION: Implement handling for your custom functions here
         default:
           return {
             tool_call_id: call_id,
@@ -39,9 +37,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     )
 
+    // return new Response(JSON.stringify(runData), { status: 200 });
     res.status(200).json(runData);
   } catch (error) {
     console.error(error);
+    // return new Response('Internal Server Error', { status: 500 });
     res.status(500).json({ error: 'An error occurred' });
   }
 }

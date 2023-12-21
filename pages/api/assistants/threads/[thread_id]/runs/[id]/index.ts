@@ -1,11 +1,31 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
 import { Run } from "openai/resources/beta/threads/runs/runs";
 
-async function validateRun(thread_id: string, run_id: string): Promise<Run | boolean> {
-  // TODO: Retrieve the run with the given run ID
-  // TODO Return the run object
+// Make sure OPENAI_API_KEY is set in your .env.local file
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  throw new Error('Not implemented');
+async function validateRun(thread_id: string, run_id: string): Promise<Run | boolean> {
+  const getRunResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}/runs/${run_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
+    },
+  });
+
+  const getRunData = await getRunResponse.json();
+
+  if (getRunData.error) {
+    console.error('Error getting run:', getRunData.error);
+    return false;
+  }
+
+  // or the lazy way
+  // const getRunData = await openai.beta.threads.runs.retrieve(thread_id, run_id);
+
+  return getRunData;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -25,6 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json(run);
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ error: 'An error occurred' });
   }
 }

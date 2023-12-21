@@ -1,12 +1,31 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
 import { Thread } from "openai/resources/beta/threads/threads";
 
+// Make sure OPENAI_API_KEY is set in your .env.local file
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function validateThread(thread_id: string): Promise<Thread | boolean> {
-  // TODO: Retrieve the thread with the given thread ID
-  // TODO Return the thread object
+  const getThreadResponse = await fetch(`https://api.openai.com/v1/threads/${thread_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'OpenAi-Beta': 'assistants=v1', // Add the OpenAi-Beta header
+    },
+  });
 
-  throw new Error('Not implemented');
+  const getThreadData = await getThreadResponse.json();
+
+  if (getThreadData.error) {
+    console.error('Error getting thread:', getThreadData.error);
+    return false;
+  }
+
+  // or the lazy way
+  // const getThreadData = await openai.beta.threads.retrieve(thread_id);
+
+  return getThreadData;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -26,6 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json(thread);
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ error: 'An error occurred' });
   }
 }
