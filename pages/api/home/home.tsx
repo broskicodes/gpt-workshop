@@ -280,7 +280,6 @@ const Home = ({
     }
   }, [
     dispatch,
-    handleNewThread,
     serverSideApiKeyIsSet,
   ]);
 
