@@ -99,6 +99,7 @@ export const Chat = memo(({ stopThreadRef }: Props) => {
       apiKey,
       threads,
       selectedThread,
+      handleCreateRun,
     ],
   );
 
@@ -198,9 +199,7 @@ export const Chat = memo(({ stopThreadRef }: Props) => {
         }, 1000);
         return () => clearInterval(pollInterval);
     }
-  }, [latestRun, 
-    // handleChatAction, handlingAction, 
-    handlePollRun]);
+  }, [latestRun, handlePollRun, handleUpdateThread]);
 
   useEffect(() => {
     throttledScrollDown();

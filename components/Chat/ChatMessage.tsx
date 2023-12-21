@@ -10,8 +10,6 @@ import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { updateConversation } from '@/utils/app/conversation';
-
 import { Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -22,6 +20,7 @@ import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { updateThread } from '@/utils/app/thread';
 
 export interface Props {
   message: Message;
@@ -33,7 +32,7 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectedConversation, conversations, currentMessage, messageIsStreaming },
+    state: { selectedThread, threads, currentMessage, messageIsStreaming },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -58,7 +57,7 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
 
   const handleEditMessage = () => {
     if (message.content != messageContent) {
-      if (selectedConversation && onEdit) {
+      if (selectedThread && onEdit) {
         onEdit({ ...message, content: messageContent });
       }
     }
@@ -66,9 +65,9 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
   };
 
   const handleDeleteMessage = () => {
-    if (!selectedConversation) return;
+    if (!selectedThread) return;
 
-    const { messages } = selectedConversation;
+    const { messages } = selectedThread;
     const findIndex = messages.findIndex((elm) => elm === message);
 
     if (findIndex < 0) return;
@@ -81,17 +80,17 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
     } else {
       messages.splice(findIndex, 1);
     }
-    const updatedConversation = {
-      ...selectedConversation,
+    const updatedThread = {
+      ...selectedThread,
       messages,
     };
 
-    const { single, all } = updateConversation(
-      updatedConversation,
-      conversations,
+    const { single, all } = updateThread(
+      updatedThread,
+      threads,
     );
-    homeDispatch({ field: 'selectedConversation', value: single });
-    homeDispatch({ field: 'conversations', value: all });
+    homeDispatch({ field: 'selectedThread', value: single });
+    homeDispatch({ field: 'threads', value: all });
   };
 
   const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -262,7 +261,7 @@ export const ChatMessage: FC<Props> = memo(({ message, messageIndex, onEdit }) =
                 }}
               >
                 {`${message.content}${
-                  messageIsStreaming && messageIndex == (selectedConversation?.messages.length ?? 0) - 1 ? '`▍`' : ''
+                  messageIsStreaming && messageIndex == (selectedThread?.messages.length ?? 0) - 1 ? '`▍`' : ''
                 }`}
               </MemoizedReactMarkdown>
 

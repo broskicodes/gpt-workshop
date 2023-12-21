@@ -210,7 +210,7 @@ const Home = ({
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
     }
-  }, [selectedThread]);
+  }, [dispatch, selectedThread]);
 
   useEffect(() => {
     assistantId &&
@@ -220,7 +220,7 @@ const Home = ({
         field: 'serverSideApiKeyIsSet',
         value: serverSideApiKeyIsSet,
       });
-  }, [assistantId, serverSideApiKeyIsSet]);
+  }, [assistantId, dispatch, serverSideApiKeyIsSet]);
 
   // ON LOAD --------------------------------------------
 
@@ -280,6 +280,7 @@ const Home = ({
     }
   }, [
     dispatch,
+    handleNewThread,
     serverSideApiKeyIsSet,
   ]);
 

@@ -99,7 +99,7 @@ export const Chatbar = () => {
         value: threads,
       });
     }
-  }, [searchTerm, threads]);
+  }, [searchTerm, threads, chatDispatch]);
 
   return (
     <ChatbarContext.Provider
