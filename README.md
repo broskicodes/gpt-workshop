@@ -5,6 +5,18 @@ To get started, please fork the repo using the button in the top right corner. O
 
 I have made videos with instructions for walking you through the entire process of completing the workshop. From setting up your [OpenAI](https://openai.com/) account to deploying your assistant application with [Vercel](https://vercel.com/). They can be found in the `tutorial` folder. I recommend that you watch them in order as you progress through the workshop.
 
+## Where to write code
+All files that require edits are in the `/pages/api/assistants` directory. Specifically they are listed as follows:
+- `assistants/[id]/index.ts`
+- `assistants/threads/index.ts`
+- `assistants/threads/[thread_id]/index.ts`
+- `assistants/threads/[thread_id]/messages.ts`
+- `assistants/threads/[thread_id]/runs/index.ts`
+- `assistants/threads/[thread_id]/runs/[id]/index.ts`
+- `assistants/threads/[thread_id]/runs/[id]/cancel.ts`
+
+Each file as `TODO` items listed in it. Once you have completed them all you should be able to test your assistant with `yarn dev` then opening `localhost:3000` in your browser.
+
 ## Couple things to note:
 - The front-end used for this workshop is forked from [Chatbot-UI](https://github.com/mckaywrigley/chatbot-ui) written by [McKay Wrigley](https://github.com/mckaywrigley/). Feel free to show him some support!
 - A working implementation of the finished product can be found and tested at [this](https://gpt-workshop.vercel.app/) link. Feel free to try it out yourself
